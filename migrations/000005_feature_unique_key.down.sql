@@ -1,0 +1,1 @@
+DROP INDEX idx_feature_env_key;
