@@ -19,6 +19,15 @@ type Feature struct {
 
 	Enabled bool
 
+	// Percentage of users eligible for this feature.
+	// Range: 0-100
+	RolloutPercentage int
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+func (f *Feature) IsRolloutValid() bool {
+	return f.RolloutPercentage >= 0 &&
+		f.RolloutPercentage <= 100
 }

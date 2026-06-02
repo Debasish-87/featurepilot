@@ -21,6 +21,7 @@ func (r *PostgresRepository) GetByID(
 			name,
 			description,
 			enabled,
+			rollout_percentage,
 			created_at,
 			updated_at
 		FROM features
@@ -40,6 +41,7 @@ func (r *PostgresRepository) GetByID(
 		&feature.Name,
 		&feature.Description,
 		&feature.Enabled,
+		&feature.RolloutPercentage,
 		&feature.CreatedAt,
 		&feature.UpdatedAt,
 	)

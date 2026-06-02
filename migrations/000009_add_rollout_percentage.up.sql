@@ -1,0 +1,2 @@
+ALTER TABLE features
+ADD COLUMN rollout_percentage INT NOT NULL DEFAULT 100;

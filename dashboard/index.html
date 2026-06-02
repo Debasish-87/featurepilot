@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeaturePilot Analytics</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>FeaturePilot</h1>
+        <p>Analytics Plane</p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <h3>Features</h3>
+            <span id="features">0</span>
+        </div>
+
+        <div class="stat-card">
+            <h3>Evaluations</h3>
+            <span id="evaluations">0</span>
+        </div>
+
+        <div class="stat-card">
+            <h3>Active Releases</h3>
+            <span id="releases">0</span>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h2>Traffic</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Requests</th>
+                </tr>
+            </thead>
+            <tbody id="traffic-body"></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Adoption</h2>
+        <div id="adoption-list"></div>
+    </div>
+
+    <div class="card">
+        <h2>Risk</h2>
+        <div id="risk-list"></div>
+    </div>
+
+</div>
+
+<script>
+
+const API = "http://localhost:8000/analytics";
+
+async function loadOverview() {
+
+    const res = await fetch(`${API}/overview`);
+    const data = await res.json();
+
+    document.getElementById("features").innerText =
+        data.total_features;
+
+    document.getElementById("evaluations").innerText =
+        data.total_evaluations;
+
+    document.getElementById("releases").innerText =
+        data.active_releases;
+}
+
+async function loadTraffic() {
+
+    const res = await fetch(`${API}/traffic`);
+    const data = await res.json();
+
+    const tbody =
+        document.getElementById("traffic-body");
+
+    tbody.innerHTML = "";
+
+    data.forEach(item => {
+
+        tbody.innerHTML += `
+        <tr>
+            <td>${item.feature_key}</td>
+            <td>${item.requests}</td>
+        </tr>
+        `;
+    });
+}
+
+async function loadAdoption() {
+
+    const res = await fetch(`${API}/adoption`);
+    const data = await res.json();
+
+    const container =
+        document.getElementById("adoption-list");
+
+    container.innerHTML = "";
+
+    data.forEach(item => {
+
+        const rate =
+            Math.round(
+                (item.enabled / item.total) * 100
+            );
+
+        container.innerHTML += `
+        <div class="adoption-row">
+
+            <div class="label">
+                ${item.feature_key}
+            </div>
+
+            <div class="bar">
+                <div
+                    class="fill"
+                    style="width:${rate}%">
+                </div>
+            </div>
+
+            <div>${rate}%</div>
+
+        </div>
+        `;
+    });
+}
+
+async function loadRisk() {
+
+    const res = await fetch(`${API}/risk`);
+    const data = await res.json();
+
+    const container =
+        document.getElementById("risk-list");
+
+    container.innerHTML = "";
+
+    data.forEach(item => {
+
+        const level =
+            item.error_rate > 10 ||
+            item.latency_ms > 500
+                ? "HIGH"
+                : "LOW";
+
+        container.innerHTML += `
+        <div class="risk-card">
+
+            <span class="badge ${level}">
+                ${level}
+            </span>
+
+            <p>Error Rate:
+               ${item.error_rate}%</p>
+
+            <p>Latency:
+               ${item.latency_ms}ms</p>
+
+        </div>
+        `;
+    });
+}
+
+loadOverview();
+loadTraffic();
+loadAdoption();
+loadRisk();
+
+</script>
+
+</body>
+</html>

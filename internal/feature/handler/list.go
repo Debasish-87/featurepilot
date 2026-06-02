@@ -35,12 +35,13 @@ func (h *Handler) List(c *gin.Context) {
 		response = append(
 			response,
 			featureDTO.FeatureResponse{
-				ID:            feature.ID.String(),
-				EnvironmentID: feature.EnvironmentID.String(),
-				Key:           feature.Key,
-				Name:          feature.Name,
-				Description:   feature.Description,
-				Enabled:       feature.Enabled,
+				ID:                feature.ID.String(),
+				EnvironmentID:     feature.EnvironmentID.String(),
+				Key:               feature.Key,
+				Name:              feature.Name,
+				Description:       feature.Description,
+				Enabled:           feature.Enabled,
+				RolloutPercentage: feature.RolloutPercentage,
 			},
 		)
 	}

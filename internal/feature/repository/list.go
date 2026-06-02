@@ -18,6 +18,7 @@ func (r *PostgresRepository) List(
 			name,
 			description,
 			enabled,
+			rollout_percentage,
 			created_at,
 			updated_at
 		FROM features
@@ -46,6 +47,7 @@ func (r *PostgresRepository) List(
 			&feature.Name,
 			&feature.Description,
 			&feature.Enabled,
+			&feature.RolloutPercentage,
 			&feature.CreatedAt,
 			&feature.UpdatedAt,
 		); err != nil {

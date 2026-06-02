@@ -42,6 +42,7 @@ func (h *Handler) Create(c *gin.Context) {
 		request.Key,
 		request.Name,
 		request.Description,
+		request.RolloutPercentage,
 	)
 	if err != nil {
 		c.JSON(
@@ -56,12 +57,13 @@ func (h *Handler) Create(c *gin.Context) {
 	c.JSON(
 		http.StatusCreated,
 		featureDTO.FeatureResponse{
-			ID:            feature.ID.String(),
-			EnvironmentID: feature.EnvironmentID.String(),
-			Key:           feature.Key,
-			Name:          feature.Name,
-			Description:   feature.Description,
-			Enabled:       feature.Enabled,
+			ID:                feature.ID.String(),
+			EnvironmentID:     feature.EnvironmentID.String(),
+			Key:               feature.Key,
+			Name:              feature.Name,
+			Description:       feature.Description,
+			Enabled:           feature.Enabled,
+			RolloutPercentage: feature.RolloutPercentage,
 		},
 	)
 }

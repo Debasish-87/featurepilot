@@ -35,6 +35,26 @@ func (s *Service) Disable(
 		return err
 	}
 
+	// Audit Event
+	if s.audit != nil {
+		s.audit.Log(
+			ctx,
+			"FEATURE_DISABLED",
+			"feature",
+			id,
+			fmt.Sprintf(
+				`{"key":"%s","environment":"%s"}`,
+				feature.Key,
+				environment.Name,
+			),
+		)
+	}
+
+	// TODO:
+	// rollout cache uses:
+	// feature:<env>:<feature>:<user>
+	// current invalidation won't clear all user caches
+
 	cacheKey := fmt.Sprintf(
 		"feature:%s:%s",
 		environment.Name,

@@ -27,6 +27,7 @@ func (h *Handler) Evaluate(c *gin.Context) {
 		c.Request.Context(),
 		request.Environment,
 		request.FeatureKey,
+		request.UserID,
 	)
 
 	if err != nil {

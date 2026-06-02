@@ -3,6 +3,7 @@ services:
   postgres:
     image: postgres:16
     container_name: featurepilot-postgres
+    restart: unless-stopped
 
     environment:
       POSTGRES_USER: postgres
@@ -15,12 +16,86 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7
     container_name: featurepilot-redis
+    restart: unless-stopped
 
     ports:
-      - "6379:6379"
+      - "6380:6379"
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: featurepilot-api
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      APP_NAME: featurepilot
+
+      HTTP_PORT: "8080"
+
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: featurepilot
+
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+
+  analytics:
+    build:
+      context: ./analytics-service
+
+    container_name: featurepilot-analytics
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/featurepilot
+
+  dashboard:
+    build:
+      context: ./dashboard
+
+    container_name: featurepilot-dashboard
+    restart: unless-stopped
+
+    depends_on:
+      - analytics
+
+    ports:
+      - "3000:80"
 
 volumes:
   postgres_data:

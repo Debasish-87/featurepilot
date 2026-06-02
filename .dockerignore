@@ -1,0 +1,17 @@
+.git
+.vscode
+
+analytics-service/.venv
+analytics-service/__pycache__
+
+dashboard
+
+docs
+
+*.log
+
+all_code.txt
+
+.env
+
+tmp

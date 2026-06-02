@@ -21,9 +21,9 @@ func Load() (*Config, error) {
 
 	viper.SetConfigFile(".env")
 
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
+	_ = viper.ReadInConfig()
+
+	viper.AutomaticEnv()
 
 	cfg := &Config{
 		AppName: viper.GetString("APP_NAME"),

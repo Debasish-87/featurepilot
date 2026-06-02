@@ -6,10 +6,20 @@ import (
 	"github.com/Debasish-87/featurepilot/internal/cache"
 	"github.com/Debasish-87/featurepilot/internal/config"
 	"github.com/Debasish-87/featurepilot/internal/database"
+	"github.com/Debasish-87/featurepilot/internal/metrics"
 
 	environmentHandler "github.com/Debasish-87/featurepilot/internal/environment/handler"
 	environmentRepository "github.com/Debasish-87/featurepilot/internal/environment/repository"
 	environmentService "github.com/Debasish-87/featurepilot/internal/environment/service"
+
+	evaluationCache "github.com/Debasish-87/featurepilot/internal/evaluation/cache"
+	evaluationHandler "github.com/Debasish-87/featurepilot/internal/evaluation/handler"
+	evaluationRepository "github.com/Debasish-87/featurepilot/internal/evaluation/repository"
+	evaluationService "github.com/Debasish-87/featurepilot/internal/evaluation/service"
+
+	featureHandler "github.com/Debasish-87/featurepilot/internal/feature/handler"
+	featureRepository "github.com/Debasish-87/featurepilot/internal/feature/repository"
+	featureService "github.com/Debasish-87/featurepilot/internal/feature/service"
 
 	healthHandler "github.com/Debasish-87/featurepilot/internal/health/handler"
 
@@ -21,17 +31,23 @@ import (
 	projectRepository "github.com/Debasish-87/featurepilot/internal/project/repository"
 	projectService "github.com/Debasish-87/featurepilot/internal/project/service"
 
-	featureHandler "github.com/Debasish-87/featurepilot/internal/feature/handler"
-	featureRepository "github.com/Debasish-87/featurepilot/internal/feature/repository"
-	featureService "github.com/Debasish-87/featurepilot/internal/feature/service"
+	releaseHandler "github.com/Debasish-87/featurepilot/internal/release/handler"
+	releaseRepository "github.com/Debasish-87/featurepilot/internal/release/repository"
+	releaseService "github.com/Debasish-87/featurepilot/internal/release/service"
 
-	evaluationCache "github.com/Debasish-87/featurepilot/internal/evaluation/cache"
-	evaluationHandler "github.com/Debasish-87/featurepilot/internal/evaluation/handler"
-	evaluationRepository "github.com/Debasish-87/featurepilot/internal/evaluation/repository"
-	evaluationService "github.com/Debasish-87/featurepilot/internal/evaluation/service"
+	releaseMetricHandler "github.com/Debasish-87/featurepilot/internal/release_metric/handler"
+	releaseMetricRepository "github.com/Debasish-87/featurepilot/internal/release_metric/repository"
+	releaseMetricService "github.com/Debasish-87/featurepilot/internal/release_metric/service"
+
+	auditRepository "github.com/Debasish-87/featurepilot/internal/audit/repository"
+	auditService "github.com/Debasish-87/featurepilot/internal/audit/service"
+
+	evaluationEventRepo "github.com/Debasish-87/featurepilot/internal/evaluation_event/repository"
 
 	"github.com/Debasish-87/featurepilot/pkg/logger"
+
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -101,6 +117,16 @@ func main() {
 		rdb,
 	)
 
+	// Audit
+
+	auditRepo := auditRepository.New(
+		db,
+	)
+
+	auditSvc := auditService.New(
+		auditRepo,
+	)
+
 	// Features
 
 	featureRepo := featureRepository.New(db)
@@ -109,6 +135,7 @@ func main() {
 		featureRepo,
 		environmentRepo,
 		evalCache,
+		auditSvc,
 	)
 
 	featureHdl := featureHandler.New(
@@ -121,14 +148,49 @@ func main() {
 		db,
 	)
 
+	eventRepo := evaluationEventRepo.New(
+		db,
+	)
+
 	evaluationSvc := evaluationService.New(
 		evaluationRepo,
 		evalCache,
+		eventRepo,
 	)
 
 	evaluationHdl := evaluationHandler.New(
 		evaluationSvc,
 	)
+
+	// release
+
+	releaseRepo := releaseRepository.New(db)
+
+	releaseSvc := releaseService.New(
+		releaseRepo,
+	)
+
+	releaseHdl := releaseHandler.New(
+		releaseSvc,
+	)
+
+	// Release Metrics
+
+	metricRepo := releaseMetricRepository.New(db)
+
+	metricSvc := releaseMetricService.New(
+		metricRepo,
+		releaseSvc,
+	)
+
+	metricHdl := releaseMetricHandler.New(
+		metricSvc,
+	)
+
+	// Register Prometheus Metrics
+
+	metrics.Register()
+
 	// Router
 
 	router := gin.New()
@@ -142,6 +204,13 @@ func main() {
 	health := healthHandler.NewHealthHandler()
 
 	router.GET("/health", health.Health)
+
+	// Prometheus Metrics Endpoint
+
+	router.GET(
+		"/metrics",
+		gin.WrapH(promhttp.Handler()),
+	)
 
 	// Organization Routes
 
@@ -209,7 +278,7 @@ func main() {
 		environmentHdl.Delete,
 	)
 
-	// Features Routes
+	// Feature Routes
 
 	router.GET(
 		"/api/v1/features/:id",
@@ -241,11 +310,30 @@ func main() {
 		featureHdl.Disable,
 	)
 
-	// Evaluates Routes
+	// Evaluation Routes
 
 	router.POST(
 		"/api/v1/evaluate",
 		evaluationHdl.Evaluate,
+	)
+
+	// Release Routes
+
+	router.POST(
+		"/api/v1/releases",
+		releaseHdl.Create,
+	)
+
+	router.GET(
+		"/api/v1/releases",
+		releaseHdl.List,
+	)
+
+	// Release Mterics
+
+	router.POST(
+		"/api/v1/release-metrics",
+		metricHdl.Create,
 	)
 
 	zapLogger.Info("featurepilot started")

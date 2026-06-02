@@ -42,12 +42,13 @@ func (h *Handler) GetByID(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		featureDTO.FeatureResponse{
-			ID:            feature.ID.String(),
-			EnvironmentID: feature.EnvironmentID.String(),
-			Key:           feature.Key,
-			Name:          feature.Name,
-			Description:   feature.Description,
-			Enabled:       feature.Enabled,
+			ID:                feature.ID.String(),
+			EnvironmentID:     feature.EnvironmentID.String(),
+			Key:               feature.Key,
+			Name:              feature.Name,
+			Description:       feature.Description,
+			Enabled:           feature.Enabled,
+			RolloutPercentage: feature.RolloutPercentage,
 		},
 	)
 }

@@ -12,4 +12,6 @@ type FeatureResponse struct {
 	Description string `json:"description"`
 
 	Enabled bool `json:"enabled"`
+
+	RolloutPercentage int `json:"rollout_percentage"`
 }
