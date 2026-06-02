@@ -33,3 +33,9 @@ postgres_data/
 
 # Temporary
 tmp/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
