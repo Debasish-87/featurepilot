@@ -259,6 +259,34 @@ docker compose up -d
 | PostgreSQL       | localhost:5433                                           |
 | Redis            | localhost:6380                                           |
 
+
+## Screenshots
+
+### Dashboard
+
+Feature flag management dashboard with rollout controls, release visibility, and analytics.
+
+![Dashboard](./screenshots/Dashboard.png)
+
+### Metrics
+
+Prometheus metrics and monitoring for evaluation tracking and system health.
+
+![Metrics](./screenshots/Metrics.png)
+
+### Docker and Database
+
+FeaturePilot services running with PostgreSQL and Redis using Docker Compose.
+
+![Docker and Database](./screenshots/Docker_and_Database.png)
+
+### All Containers Running
+
+Complete FeaturePilot platform running successfully.
+
+![All Containers Running](./screenshots/All_Conatainer_Running.png)
+
+
 ## API Example
 
 ### Create Feature
