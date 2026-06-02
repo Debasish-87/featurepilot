@@ -1,10 +1,35 @@
+# Binaries
+featurepilot
+*.exe
+*.out
+
+# Environment
 .env
 .env.*
-bin/
-tmp/
-vendor/
 
-.idea/
+# IDE
 .vscode/
+.idea/
 
+# OS
+.DS_Store
+
+# Logs
 *.log
+
+# Build
+dist/
+build/
+
+# Go
+coverage.out
+
+# Python
+__pycache__/
+*.pyc
+
+# Docker volumes
+postgres_data/
+
+# Temporary
+tmp/
